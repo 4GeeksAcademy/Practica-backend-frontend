@@ -1,22 +1,52 @@
-"""
-This module takes care of starting the API Server, Loading the DB and Adding the endpoints
-"""
-from flask import Flask, request, jsonify, url_for, Blueprint
+import bcrypt # encriptar mis contraseñas
+from flask import request, jsonify, Blueprint
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from api.models import db, User
-from api.utils import generate_sitemap, APIException
-from flask_cors import CORS
 
-api = Blueprint('api', __name__)
+api = Blueprint('api', __name__, url_prefix="/api")  # Blueprint es para crear módulos y en esos módulos se puede organizar mejor la API
 
-# Allow CORS requests to this API
-CORS(api)
+# Registro
+
+@api.route('/register', methods=['POST'])
+def register():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({"msg": "El usuario ya existe"}), 400   #Verificación si existe o no el usuario
+
+    # Generar salt y encriptar password
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+
+    user = User.crear_user(email=email, password=hashed_password.decode('utf-8'), is_active=True)
+    return jsonify(user.serialize()), 201
 
 
-@api.route('/hello', methods=['POST', 'GET'])
-def handle_hello():
+# Login
+@api.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    email = data.get("email")
+    password = data.get("password")
 
-    response_body = {
-        "message": "Hello! I'm a message that came from the backend, check the network tab on the google inspector and you will see the GET request"
-    }
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"msg": "Credenciales inválidas"}), 401
 
-    return jsonify(response_body), 200
+    # Verificar password con bcrypt
+    if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        return jsonify({"msg": "Credenciales inválidas"}), 401
+
+    token = create_access_token(identity=str(user.id))
+    return jsonify({"token": token, "user": user.serialize()}), 200
+
+
+# Ruta protegida
+@api.route('/profile', methods=['GET'])
+@jwt_required()
+def profile():
+    current_user_id = int(get_jwt_identity())
+    user = User.query.get(current_user_id)
+    return jsonify(user.serialize()), 200

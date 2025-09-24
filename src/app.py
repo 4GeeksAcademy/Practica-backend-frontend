@@ -1,8 +1,8 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-import os
-from flask import Flask, request, jsonify, url_for, send_from_directory
+import os  #es para las variables que estan en el .env, para poder utilizarlas, como el os de la linea 20
+from flask import Flask, request, jsonify, url_for, send_from_directory     
 from flask_migrate import Migrate
 from flask_swagger import swagger
 from api.utils import APIException, generate_sitemap
@@ -10,14 +10,26 @@ from api.models import db
 from api.routes import api
 from api.admin import setup_admin
 from api.commands import setup_commands
+from datetime import timedelta
+from flask_cors import CORS
 
-# from models import Person
+#configurar app para JWT
+from flask_jwt_extended import JWTManager
+
 
 ENV = "development" if os.getenv("FLASK_DEBUG") == "1" else "production"
 static_file_dir = os.path.join(os.path.dirname(
     os.path.realpath(__file__)), '../dist/')
 app = Flask(__name__)
 app.url_map.strict_slashes = False
+CORS(api)
+
+# después de crear app
+app.config["JWT_SECRET_KEY"] = "clave_super_secreta"  # cámbiala por algo seguro
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)  # 1 hora
+jwt = JWTManager(app)
+
+
 
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
@@ -38,7 +50,7 @@ setup_admin(app)
 setup_commands(app)
 
 # Add all endpoints form the API with a "api" prefix
-app.register_blueprint(api, url_prefix='/api')
+app.register_blueprint(api)    # la registro aqui para que flask la coja 
 
 # Handle/serialize errors like a JSON object
 
