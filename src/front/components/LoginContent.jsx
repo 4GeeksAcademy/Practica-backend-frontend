@@ -16,6 +16,7 @@ export default function LoginContent() {
 
         try {
             const data = await loginUser(email, password);
+                console.log("Login response:", data);
 
             // Guardar token si tu backend devuelve uno
             if (data.token) {
@@ -35,6 +36,7 @@ export default function LoginContent() {
         >
             <div style={{ minWidth: "320px" }}>
                 <form
+                    onSubmit={handleSubmit} /* 👈 Faltaba esto */
                     style={{
                         borderRadius: "16px",
                         padding: "2rem",
@@ -55,6 +57,9 @@ export default function LoginContent() {
                             className="form-control rounded"
                             id="email"
                             placeholder="tu@email.com"
+                            value={email}   // 👈 Conectado con el estado
+                            onChange={(e) => setEmail(e.target.value)} // 👈 Actualiza el estado
+                            required
                         />
                     </div>
 
@@ -67,6 +72,9 @@ export default function LoginContent() {
                             className="form-control rounded"
                             id="password"
                             placeholder="********"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
                         />
                     </div>
 

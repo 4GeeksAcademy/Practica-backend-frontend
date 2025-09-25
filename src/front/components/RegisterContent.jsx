@@ -5,22 +5,35 @@ import { registerUser } from "../services/fetch";
 
 export default function RegisterContent() {
 
-const [email, setEmail] = useState ("");
-const [password, setPassword] = useState ("");
-const [error, setError] = useState("");
-const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    try {
+      await registerUser(email, password);
+      navigate("/login");
+    } catch (error) {
+      setError("Error al registrar usuario. Inténtalo de nuevo.");
+    }
+  };
 
 
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#0d6efd" }}>
-        
+
       <div style={{ minWidth: "320px" }}>
         <form
+          onSubmit={handleSubmit}
           style={{
-            borderRadius: "16px",          
+            borderRadius: "16px",
             padding: "2rem",               // espacio interior amplio
-            backgroundColor: "#ffffff",    
+            backgroundColor: "#ffffff",
             boxShadow: "0 8px 20px rgba(0,0,0,0.08)", // sombra suave y elegante
           }}
         >
@@ -33,6 +46,9 @@ const navigate = useNavigate();
               className="form-control rounded"
               id="email"
               placeholder="tu@email.com"
+              value={email}   // 👈 Conectado al estado
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -43,6 +59,9 @@ const navigate = useNavigate();
               className="form-control rounded"
               id="password"
               placeholder="********"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 

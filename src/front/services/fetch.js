@@ -1,4 +1,4 @@
-const URL_BASE="https://stunning-funicular-jj9q5r5pjvv72r4g-3001.app.github.dev"
+const URL_BASE="https://stunning-funicular-jj9q5r5pjvv72r4g-3001.app.github.dev/api"
 
 export const loginUser = async (email, password) => {
     try {
