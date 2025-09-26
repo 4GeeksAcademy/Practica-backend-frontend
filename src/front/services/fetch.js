@@ -45,6 +45,41 @@ export const registerUser = async (email, password) => {
     }
 };
 
+    export const getProfile = async (dispatch) => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No estás autenticado");
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          "https://stunning-funicular-jj9q5r5pjvv72r4g-3001.app.github.dev/api/profile",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al obtener datos del perfil");
+        }
+
+        const data = await response.json();
+        dispatch({ type: "set_user_profile", payload: data });
+      } catch (err) {
+        setError(err.message);
+      }
+    };
+
+
+
+
+
+
 
 
 
