@@ -23,6 +23,9 @@ def register():
     user = User.crear_user(email=email, password=hashed_password.decode('utf-8'), is_active=True)
     return jsonify(user.serialize()), 201
 
+@api.route('/hello', methods=['GET', 'POST'])
+def handle_hello():
+    return jsonify({"message": "Hello! This message comes from the backend."}), 200
 
 # Login
 @api.route('/login', methods=['POST'])
