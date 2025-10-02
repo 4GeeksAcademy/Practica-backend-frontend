@@ -42,14 +42,15 @@ def login():
     if not bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
         return jsonify({"msg": "Credenciales inválidas"}), 401
 
-    token = create_access_token(identity=str(user.id))
-    return jsonify({"token": token, "user": user.serialize()}), 200
+    # identity=str(user.id) identity se refiere al id con el que se genero el token
+    token = create_access_token(identity=str(user.id)) #es como decir, creame un token usando este id
+    return jsonify({"token": token}), 200
 
 
 # Ruta protegida
 @api.route('/profile', methods=['GET'])
-@jwt_required()
+@jwt_required()   # me requiere el JWT TOKEN!!!!!
 def profile():
-    current_user_id = int(get_jwt_identity())
-    user = User.query.get(current_user_id)
+    current_user_id = int(get_jwt_identity())   #LA IDENTIDAD CON LA QUE SE GENERO EL TOKEN ES EL ID
+    user = User.query.get(current_user_id) #current_user traeme el usuario actual
     return jsonify(user.serialize()), 200
